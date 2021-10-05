@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+function build {
+  local workdir
+  workdir=$(pwd)
+  echo $workdir
+  sudo docker build -t blairy/unifi_controller $workdir;
+}
+
+function run {
+  local contid
+  local contip
+  contid=$(sudo docker run --cap-add=ALL -dt --rm blairy/unifi_controller);
+  sudo docker exec $contid /etc/init.d/unifi start;
+  contip=$(sudo docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $contid); 
+  sudo docker ps -l
+  printf "\nConnect to GUI using your browser at https://$contip:8443\n"
+}
+
+function main {  
+  build;
+  run;
+}
+
+main;
